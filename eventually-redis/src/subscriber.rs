@@ -68,9 +68,9 @@ where
     Event: Send + Sync,
     for<'de> Event: Deserialize<'de>,
 {
-    type SourceId = Id;
-    type Event = Event;
     type Error = SubscriberError;
+    type Event = Event;
+    type SourceId = Id;
 
     fn subscribe_all(&self) -> BoxFuture<SubscriberResult<SubscriberEventStream<Self>>> {
         #[derive(Deserialize)]

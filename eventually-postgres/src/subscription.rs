@@ -155,9 +155,9 @@ where
     <Tls as MakeTlsConnect<Socket>>::TlsConnect: Send,
     <<Tls as MakeTlsConnect<Socket>>::TlsConnect as TlsConnect<Socket>>::Future: Send,
 {
-    type SourceId = SourceId;
-    type Event = Event;
     type Error = Error;
+    type Event = Event;
+    type SourceId = SourceId;
 
     fn resume(&self) -> BoxFuture<Result<SubscriptionStream<Self>, Self::Error>> {
         let fut = async move {
@@ -168,7 +168,8 @@ where
             // In the initial case, the last_sequence_number
             // would be -1, which will load everything from the start.
             let checkpoint: u32 = (last_sequence_number + 1).try_into().expect(
-                "in case of overflow, it means there is a bug in the optimistic versioning code; \\
+                "in case of overflow, it means there is a bug in the optimistic versioning code; \
+                 \\
                 please open an issue with steps to reproduce the bug",
             );
 

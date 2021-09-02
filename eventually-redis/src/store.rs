@@ -96,9 +96,9 @@ where
     Event: Serialize + Send + Sync,
     for<'de> Event: Deserialize<'de>,
 {
-    type SourceId = Id;
-    type Event = Event;
     type Error = StoreError;
+    type Event = Event;
+    type SourceId = Id;
 
     fn append(
         &mut self,

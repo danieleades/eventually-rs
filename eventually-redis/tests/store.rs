@@ -142,9 +142,9 @@ async fn it_creates_persistent_subscription_successfully() {
     #[derive(Debug, Default)]
     struct Counter(usize);
     impl Projection for Counter {
-        type SourceId = String;
-        type Event = Event;
         type Error = std::convert::Infallible;
+        type Event = Event;
+        type SourceId = String;
 
         fn project<'a>(
             &'a mut self,

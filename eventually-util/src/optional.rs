@@ -16,35 +16,44 @@ use futures::future::BoxFuture;
 /// of this trait.
 ///
 /// [`Aggregate`]: ../../eventually_core/aggregate/trait.Aggregate.html
-/// [`State`]: ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.State
+/// [`State`]:
+/// ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.State
 /// [`as_aggregate`]: trait.Aggregate.html#method.as_aggregate
 pub trait Aggregate {
     /// Identifier type of the Aggregate.
     ///
     /// Check out [`Aggregate::Id`] for more information.
     ///
-    /// [`Aggregate::State`]: ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.State
+    /// [`Aggregate::State`]:
+    /// ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.
+    /// State
     type Id: Eq;
 
     /// State of the Aggregate.
     ///
     /// Check out [`Aggregate::State`] for more information.
     ///
-    /// [`Aggregate::State`]: ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.State
+    /// [`Aggregate::State`]:
+    /// ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.
+    /// State
     type State;
 
     /// Events produced and supported by the Aggregate.
     ///
     /// Check out [`Aggregate::Event`] for more information.
     ///
-    /// [`Aggregate::Event`]: ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.Event
+    /// [`Aggregate::Event`]:
+    /// ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.
+    /// Event
     type Event;
 
     /// Commands supported by the Aggregate.
     ///
     /// Check out [`Aggregate::Command`] for more information.
     ///
-    /// [`Aggregate::Command`]: ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.Command
+    /// [`Aggregate::Command`]:
+    /// ../../eventually_core/aggregate/trait.Aggregate.html#associatedtype.
+    /// Command
     type Command;
 
     /// Error produced by the the Aggregate while applying [`Event`]s
@@ -105,8 +114,8 @@ pub trait Aggregate {
     }
 }
 
-/// _Newtype pattern_ to ensure compatibility between [`optional::Aggregate`] trait
-/// and the core [`Aggregate`] trait.
+/// _Newtype pattern_ to ensure compatibility between [`optional::Aggregate`]
+/// trait and the core [`Aggregate`] trait.
 ///
 /// ## Usage
 ///
@@ -142,11 +151,11 @@ where
     A::Command: Send + Sync,
     A::State: Send + Sync,
 {
-    type Id = A::Id;
-    type State = Option<A::State>;
-    type Event = A::Event;
     type Command = A::Command;
     type Error = A::Error;
+    type Event = A::Event;
+    type Id = A::Id;
+    type State = Option<A::State>;
 
     #[inline]
     fn apply(state: Self::State, event: Self::Event) -> Result<Self::State, Self::Error> {

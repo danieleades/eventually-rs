@@ -1,4 +1,5 @@
-//! Contains the Event Store trait for storing and streaming Aggregate [`Event`]s.
+//! Contains the Event Store trait for storing and streaming Aggregate
+//! [`Event`]s.
 //!
 //! [`Event`]: ../aggregate/trait.Aggregate.html#associatedtype.Event
 
@@ -93,9 +94,11 @@ pub trait EventStore {
     /// [`AggregateId`]: ../aggregate/type.AggregateId.html
     type SourceId: Eq;
 
-    /// Event to be stored in the `EventStore`, typically an [`Aggregate::Event`].
+    /// Event to be stored in the `EventStore`, typically an
+    /// [`Aggregate::Event`].
     ///
-    /// [`Aggregate::Event`]: ../aggregate/trait.Aggregate.html#associatedtype.Event
+    /// [`Aggregate::Event`]:
+    /// ../aggregate/trait.Aggregate.html#associatedtype.Event
     type Event;
 
     /// Possible errors returned by the `EventStore` when requesting operations.
@@ -133,8 +136,9 @@ pub trait EventStore {
         events: Vec<Self::Event>,
     ) -> BoxFuture<Result<u32, Self::Error>>;
 
-    /// Streams a list of [`Event`]s from the `EventStore` back to the application,
-    /// by specifying the desired [`SourceId`] and [`Select`] operation.
+    /// Streams a list of [`Event`]s from the `EventStore` back to the
+    /// application, by specifying the desired [`SourceId`] and [`Select`]
+    /// operation.
     ///
     /// [`SourceId`] will be used to request a particular `EventStream`.
     ///
@@ -152,8 +156,9 @@ pub trait EventStore {
         select: Select,
     ) -> BoxFuture<Result<EventStream<Self>, Self::Error>>;
 
-    /// Streams a list of [`Event`]s from the `EventStore` back to the application,
-    /// disregarding the [`SourceId`] values but using a [`Select`] operation.
+    /// Streams a list of [`Event`]s from the `EventStore` back to the
+    /// application, disregarding the [`SourceId`] values but using a
+    /// [`Select`] operation.
     ///
     /// [`SourceId`] will be used to request a particular `EventStream`.
     ///
@@ -273,8 +278,8 @@ pub mod persistent {
             }
         }
 
-        /// Specifies the [`PersistentEvent`] sequence number and moves to the next
-        /// builder state.
+        /// Specifies the [`PersistentEvent`] sequence number and moves to the
+        /// next builder state.
         ///
         /// [`PersistentEvent`]: ../struct.Persisted.html
         #[inline]
@@ -298,8 +303,8 @@ pub mod persistent {
     }
 
     impl<SourceId, T> EventBuilderWithVersion<SourceId, T> {
-        /// Specifies the [`PersistentEvent`] sequence number and moves to the next
-        /// builder state.
+        /// Specifies the [`PersistentEvent`] sequence number and moves to the
+        /// next builder state.
         ///
         /// [`PersistentEvent`]: ../struct.Persisted.html
         #[inline]

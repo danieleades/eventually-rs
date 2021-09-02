@@ -94,9 +94,9 @@ where
     Event: Debug + Send + Sync,
     for<'de> Event: Deserialize<'de>,
 {
-    type SourceId = Id;
-    type Event = Event;
     type Error = SubscriptionError;
+    type Event = Event;
+    type SourceId = Id;
 
     fn resume(&self) -> BoxFuture<SubscriptionResult<SubscriptionStream<Self>>> {
         let fut = async move {

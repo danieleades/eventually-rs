@@ -24,7 +24,8 @@ where
     A: std::error::Error + 'static,
     S: std::error::Error + 'static,
 {
-    /// Error returned by the [`Aggregate`], usually when recreating the [`State`].
+    /// Error returned by the [`Aggregate`], usually when recreating the
+    /// [`State`].
     ///
     /// [`Aggregate`]: ../aggregate/trait.Aggregate.html
     /// [`State`]: ../aggregate/trait.Aggregate.html#associatedtype.State
@@ -49,8 +50,10 @@ pub type Result<T, A, S> =
 ///
 /// A `Repository` instruments an [`EventStore`] to:
 ///
-/// * **Insert** [`Event`]s in the [`EventStore`] for an Aggregate, using the [`AggregateRoot`],
-/// * **Get** all the [`Event`]s in the [`EventStore`] and rebuild the [`State`] of an Aggregate,
+/// * **Insert** [`Event`]s in the [`EventStore`] for an Aggregate, using the
+///   [`AggregateRoot`],
+/// * **Get** all the [`Event`]s in the [`EventStore`] and rebuild the [`State`]
+///   of an Aggregate,
 /// into a new [`AggregateRoot`] instance,
 /// * **Remove** all the [`Event`]s for an Aggregate in the [`EventStore`].
 ///
