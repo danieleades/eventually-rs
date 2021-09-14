@@ -290,7 +290,7 @@
                 <span class="op">|</span>(<span class="ident">version</span>, <span class="ident">state</span>), <span class="ident">event</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
                     <span class="comment">// Always consider the max version number for the next version.</span>
                     <span class="kw">let</span> <span class="ident">new_version</span> <span class="op">=</span> <span class="ident">std::cmp::max</span>(<span class="ident">event</span>.<span class="ident">version</span>(), <span class="ident">version</span>);
-                    <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">T::apply</span>(<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="ident">event</span>).<span class="ident">map_err</span>(<span class="ident">Error::Aggregate</span>)<span class="question-mark">?</span>;
+                    <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">T::apply</span>(<span class="ident">state</span>, <span class="ident">event</span>.<span class="ident">take</span>()).<span class="ident">map_err</span>(<span class="ident">Error::Aggregate</span>)<span class="question-mark">?</span>;
 
                     <span class="prelude-val">Ok</span>((<span class="ident">new_version</span>, <span class="ident">state</span>))
                 },
