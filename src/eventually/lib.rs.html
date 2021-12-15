@@ -9,141 +9,17 @@
 <span id="9"> 9</span>
 <span id="10">10</span>
 <span id="11">11</span>
-<span id="12">12</span>
-<span id="13">13</span>
-<span id="14">14</span>
-<span id="15">15</span>
-<span id="16">16</span>
-<span id="17">17</span>
-<span id="18">18</span>
-<span id="19">19</span>
-<span id="20">20</span>
-<span id="21">21</span>
-<span id="22">22</span>
-<span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
-<span id="30">30</span>
-<span id="31">31</span>
-<span id="32">32</span>
-<span id="33">33</span>
-<span id="34">34</span>
-<span id="35">35</span>
-<span id="36">36</span>
-<span id="37">37</span>
-<span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
-<span id="64">64</span>
-<span id="65">65</span>
-<span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-</pre><pre class="rust"><code><span class="doccomment">//! A library providing components to build event-sourced applications.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The `eventually` crate provides base abstractions to design your application</span>
-<span class="doccomment">//! domain using [Domain-driven Design], using the [`Aggregate`] trait,</span>
-<span class="doccomment">//! and provides a set of nice utilities around those core abstractions:</span>
-<span class="doccomment">//! [`EventStore`], [`Repository`], [`Subscription`] and [`Projection`].</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Event Sourcing Primer</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Event Sourcing is an architectural pattern which requires domain entities&#39;</span>
-<span class="doccomment">//! (in ES lingo, **_Aggregates_**) internal state to be mutated and persisted</span>
-<span class="doccomment">//! as a list of **_Domain Events_**, rather than serializing the whole state</span>
-<span class="doccomment">//! to the database (as you would do with a typical CRUD architecture).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Events are persisted in an **_Event Store_**: an ordered, append-only log of</span>
-<span class="doccomment">//! all the events produced in your domain.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Events can be retrieved from an Event Store through **_Event Streams_**,</span>
-<span class="doccomment">//! stream of chronologically-ordered events.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The state of your Aggregates can thus be rebuilt by **streaming all the</span>
-<span class="doccomment">//! Events** back in the application, as they happened in time, to build the</span>
-<span class="doccomment">//! latest version of the state.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This architectural pattern brings in a lot of interesting goodies:</span>
-<span class="doccomment">//! * **Auditing**: never need to guess what happened in your system,</span>
-<span class="doccomment">//! thanks to the Event Store, you have a list of all the Events that have been</span>
-<span class="doccomment">//! committed during time.</span>
-<span class="doccomment">//! * **Time-machine**: _travel back in time_, by setting the state of your</span>
-<span class="doccomment">//!   service</span>
-<span class="doccomment">//! to a specific point in time, thanks to the Event Store; useful for debugging</span>
-<span class="doccomment">//! purposes.</span>
-<span class="doccomment">//! * **Projections**: create read-optimized models of your Aggregates as needed</span>
-<span class="doccomment">//! for you business operations, continuously, every time new Events are</span>
-<span class="doccomment">//! committed to the Event Store.</span>
-<span class="doccomment">//! * **Concurrency Handling**: Event-sourced application make extensive use</span>
-<span class="doccomment">//! of Optimistic Concurrency to handle concurrent-writes scenarios --</span>
-<span class="doccomment">//! concurrency conflicts and state reconciliation can become part of your</span>
-<span class="doccomment">//! Domain!</span>
-<span class="doccomment">//! * **High Performance, High Availability**: thanks to the append-only Event</span>
-<span class="doccomment">//!   Store</span>
-<span class="doccomment">//! and the use of Projections, you can write highly performant and highly</span>
-<span class="doccomment">//! available services that handle an intense amount of traffic.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [More information about this pattern can be found here.](https://eventstore.com/blog/what-is-event-sourcing/)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [Domain-driven Design]: https://en.wikipedia.org/wiki/Domain-driven_design</span>
-<span class="doccomment">//! [`Aggregate`]: trait.Aggregate.html</span>
-<span class="doccomment">//! [`EventStore`]: trait.EventStore.html</span>
-<span class="doccomment">//! [`Repository`]: struct.Repository.html</span>
-<span class="doccomment">//! [`Subscription`]: trait.Subscription.html</span>
-<span class="doccomment">//! [`Projection`]: trait.Projection.html</span>
+</pre><pre class="rust"><code><span class="attribute">#![<span class="ident">deny</span>(<span class="ident">unsafe_code</span>, <span class="ident">unused_qualifications</span>, <span class="ident">trivial_casts</span>)]</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy::all</span>)]</span>
+<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">clippy::pedantic</span>)]</span>
 
-<span class="attribute">#[<span class="ident">deny</span>(
-    <span class="ident">clippy::all</span>,
-    <span class="ident">missing_docs</span>,
-    <span class="ident">unsafe_code</span>,
-    <span class="ident">unused_qualifications</span>,
-    <span class="ident">trivial_casts</span>
-)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">aggregate</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">aggregate</span>::{<span class="ident">Aggregate</span>, <span class="ident">AggregateExt</span>, <span class="ident">AggregateId</span>, <span class="ident">AggregateRoot</span>, <span class="ident">AggregateRootFactory</span>};
-
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">repository</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">store</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">versioning</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">store::EventStore</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">projection</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">subscription</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">util</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">util::inmemory</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">util::optional</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">util::sync</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">command</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">event</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">message</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">metadata</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">test</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">version</span>;
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="eventually" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
