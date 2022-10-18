@@ -15,7 +15,7 @@ keywords = ["redis", "eventually", "event-store", "ddd", "event-sourcing"]
 eventually = { git = "https://github.com/get-eventually/eventually-rs", rev = "ab8c85d", features = ["serde"] }
 
 futures = "0.3"
-redis = { version = "0.21.2", features = ["r2d2", "tokio-comp"] }
+redis = { version = "0.22.1", features = ["r2d2", "tokio-comp"] }
 serde = { version = "1.0", features = ["derive"] }
 lazy_static = "1.4.0"
 async-stream = "0.3.0"
