@@ -1,0 +1,364 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `eventually/src/tracing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tracing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../eventually/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../eventually/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../eventually/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Module containing some extension traits to support code instrumentation
+//! using the `tracing` crate.
+
+</span><span class="kw">use </span>std::{
+    fmt::{Debug, Display},
+    marker::PhantomData,
+};
+
+<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>tracing::instrument;
+
+<span class="kw">use crate</span>::{aggregate, aggregate::Aggregate, event, message, version::Version};
+
+<span class="doccomment">/// [aggregate::Repository] type wrapper that provides instrumentation
+/// features through the `tracing` crate.
+</span><span class="attribute">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>InstrumentedAggregateRepository&lt;T, Inner&gt;
+<span class="kw">where
+    </span>T: Aggregate + Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Id: Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Event: Debug,
+    Inner: aggregate::Repository&lt;T&gt;,
+    &lt;Inner <span class="kw">as </span>aggregate::Getter&lt;T&gt;&gt;::Error: Display,
+    &lt;Inner <span class="kw">as </span>aggregate::Saver&lt;T&gt;&gt;::Error: Display,
+{
+    inner: Inner,
+    t: PhantomData&lt;T&gt;,
+}
+
+<span class="attribute">#[async_trait]
+</span><span class="kw">impl</span>&lt;T, Inner&gt; aggregate::Getter&lt;T&gt; <span class="kw">for </span>InstrumentedAggregateRepository&lt;T, Inner&gt;
+<span class="kw">where
+    </span>T: Aggregate + Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Id: Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Event: Debug,
+    Inner: aggregate::Repository&lt;T&gt;,
+    &lt;Inner <span class="kw">as </span>aggregate::Getter&lt;T&gt;&gt;::Error: Display,
+    &lt;Inner <span class="kw">as </span>aggregate::Saver&lt;T&gt;&gt;::Error: Display,
+{
+    <span class="kw">type </span>Error = &lt;Inner <span class="kw">as </span>aggregate::Getter&lt;T&gt;&gt;::Error;
+
+    <span class="attribute">#[instrument(name = <span class="string">&quot;aggregate::Repository.get&quot;</span>, ret, err, skip(<span class="self">self</span>))]
+    </span><span class="kw">async fn </span>get(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        id: <span class="kw-2">&amp;</span>T::Id,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;aggregate::Root&lt;T&gt;, aggregate::RepositoryGetError&lt;<span class="self">Self</span>::Error&gt;&gt; {
+        <span class="self">self</span>.inner.get(id).<span class="kw">await
+    </span>}
+}
+
+<span class="attribute">#[async_trait]
+</span><span class="kw">impl</span>&lt;T, Inner&gt; aggregate::Saver&lt;T&gt; <span class="kw">for </span>InstrumentedAggregateRepository&lt;T, Inner&gt;
+<span class="kw">where
+    </span>T: Aggregate + Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Id: Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Event: Debug,
+    Inner: aggregate::Repository&lt;T&gt;,
+    &lt;Inner <span class="kw">as </span>aggregate::Getter&lt;T&gt;&gt;::Error: Display,
+    &lt;Inner <span class="kw">as </span>aggregate::Saver&lt;T&gt;&gt;::Error: Display,
+{
+    <span class="kw">type </span>Error = &lt;Inner <span class="kw">as </span>aggregate::Saver&lt;T&gt;&gt;::Error;
+
+    <span class="attribute">#[instrument(name = <span class="string">&quot;aggregate::Repository.store&quot;</span>, ret, err, skip(<span class="self">self</span>))]
+    </span><span class="kw">async fn </span>store(<span class="kw-2">&amp;</span><span class="self">self</span>, root: <span class="kw-2">&amp;mut </span>aggregate::Root&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
+        <span class="self">self</span>.inner.store(root).<span class="kw">await
+    </span>}
+}
+
+<span class="doccomment">/// Extension trait for any [aggregate::Repository] type to provide
+/// instrumentation features through the `tracing` crate.
+</span><span class="kw">pub trait </span>AggregateRepositoryExt&lt;T&gt;: aggregate::Repository&lt;T&gt; + Sized
+<span class="kw">where
+    </span>T: Aggregate + Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Id: Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Event: Debug,
+    &lt;<span class="self">Self </span><span class="kw">as </span>aggregate::Getter&lt;T&gt;&gt;::Error: Display,
+    &lt;<span class="self">Self </span><span class="kw">as </span>aggregate::Saver&lt;T&gt;&gt;::Error: Display,
+{
+    <span class="doccomment">/// Returns an instrumented version of the [aggregate::Repository] instance.
+    </span><span class="kw">fn </span>with_tracing(<span class="self">self</span>) -&gt; InstrumentedAggregateRepository&lt;T, <span class="self">Self</span>&gt; {
+        InstrumentedAggregateRepository {
+            inner: <span class="self">self</span>,
+            t: PhantomData,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;R, T&gt; AggregateRepositoryExt&lt;T&gt; <span class="kw">for </span>R
+<span class="kw">where
+    </span>R: aggregate::Repository&lt;T&gt;,
+    &lt;R <span class="kw">as </span>aggregate::Getter&lt;T&gt;&gt;::Error: Display,
+    &lt;R <span class="kw">as </span>aggregate::Saver&lt;T&gt;&gt;::Error: Display,
+    T: Aggregate + Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Id: Debug,
+    &lt;T <span class="kw">as </span>Aggregate&gt;::Event: Debug,
+{
+}
+
+<span class="doccomment">/// [event::Store] type wrapper that provides instrumentation
+/// features through the `tracing` crate.
+</span><span class="attribute">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>InstrumentedEventStore&lt;T, StreamId, Event&gt;
+<span class="kw">where
+    </span>T: event::Store&lt;StreamId, Event&gt; + Send + Sync,
+    &lt;T <span class="kw">as </span>event::Appender&lt;StreamId, Event&gt;&gt;::Error: Display + Send + Sync,
+    StreamId: Debug + Send + Sync,
+    Event: message::Message + Debug + Send + Sync,
+{
+    store: T,
+    stream_id: PhantomData&lt;StreamId&gt;,
+    event: PhantomData&lt;Event&gt;,
+}
+
+<span class="kw">impl</span>&lt;T, StreamId, Event&gt; event::Streamer&lt;StreamId, Event&gt;
+    <span class="kw">for </span>InstrumentedEventStore&lt;T, StreamId, Event&gt;
+<span class="kw">where
+    </span>T: event::Store&lt;StreamId, Event&gt; + Send + Sync,
+    &lt;T <span class="kw">as </span>event::Appender&lt;StreamId, Event&gt;&gt;::Error: Display + Send + Sync,
+    StreamId: Debug + Send + Sync,
+    Event: message::Message + Debug + Send + Sync,
+{
+    <span class="kw">type </span>Error = &lt;T <span class="kw">as </span>event::Streamer&lt;StreamId, Event&gt;&gt;::Error;
+
+    <span class="attribute">#[instrument(name = <span class="string">&quot;event::Store.stream&quot;</span>, skip(<span class="self">self</span>))]
+    </span><span class="kw">fn </span>stream(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        id: <span class="kw-2">&amp;</span>StreamId,
+        select: event::VersionSelect,
+    ) -&gt; event::Stream&lt;StreamId, Event, <span class="self">Self</span>::Error&gt; {
+        <span class="self">self</span>.store.stream(id, select)
+    }
+}
+
+<span class="attribute">#[async_trait]
+</span><span class="kw">impl</span>&lt;T, StreamId, Event&gt; event::Appender&lt;StreamId, Event&gt;
+    <span class="kw">for </span>InstrumentedEventStore&lt;T, StreamId, Event&gt;
+<span class="kw">where
+    </span>T: event::Store&lt;StreamId, Event&gt; + Send + Sync,
+    &lt;T <span class="kw">as </span>event::Appender&lt;StreamId, Event&gt;&gt;::Error: Display + Send + Sync,
+    StreamId: Debug + Send + Sync,
+    Event: message::Message + Debug + Send + Sync,
+{
+    <span class="kw">type </span>Error = &lt;T <span class="kw">as </span>event::Appender&lt;StreamId, Event&gt;&gt;::Error;
+
+    <span class="attribute">#[instrument(name = <span class="string">&quot;event::Store.append&quot;</span>, ret, err, skip(<span class="self">self</span>))]
+    </span><span class="kw">async fn </span>append(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        id: StreamId,
+        version_check: event::StreamVersionExpected,
+        events: Vec&lt;event::Envelope&lt;Event&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Version, <span class="self">Self</span>::Error&gt; {
+        <span class="self">self</span>.store.append(id, version_check, events).<span class="kw">await
+    </span>}
+}
+
+<span class="doccomment">/// Extension trait for any [event::Store] type to provide
+/// instrumentation features through the `tracing` crate.
+</span><span class="kw">pub trait </span>EventStoreExt&lt;StreamId, Event&gt;: event::Store&lt;StreamId, Event&gt; + Sized
+<span class="kw">where
+    </span>&lt;<span class="self">Self </span><span class="kw">as </span>event::Appender&lt;StreamId, Event&gt;&gt;::Error: Display,
+    StreamId: Debug + Send + Sync,
+    Event: message::Message + Debug + Send + Sync,
+{
+    <span class="doccomment">/// Returns an instrumented version of the [event::Store] instance.
+    </span><span class="kw">fn </span>with_tracing(<span class="self">self</span>) -&gt; InstrumentedEventStore&lt;<span class="self">Self</span>, StreamId, Event&gt; {
+        InstrumentedEventStore {
+            store: <span class="self">self</span>,
+            stream_id: PhantomData,
+            event: PhantomData,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;T, StreamId, Event&gt; EventStoreExt&lt;StreamId, Event&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: event::Store&lt;StreamId, Event&gt; + Send + Sync,
+    &lt;T <span class="kw">as </span>event::Appender&lt;StreamId, Event&gt;&gt;::Error: Display + Send + Sync,
+    StreamId: Debug + Send + Sync,
+    Event: message::Message + Debug + Send + Sync,
+{
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="eventually" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
